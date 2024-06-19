@@ -12,7 +12,7 @@ set(ENV{PKG_CONFIG_PATH} "/usr/local/lib/pkgconfig/")
 find_package(czmq 4.2.1 REQUIRED)
 find_package (glog 0.7.0 REQUIRED)
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(zmq REQUIRED IMPORTED_TARGET libzmq libczmq)
+pkg_check_modules(zmq REQUIRED IMPORTED_TARGET "libzmq>=4.3.5" "libczmq>=4.2.1")
 
 
 # INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/3rdPart/libyuv/include)
