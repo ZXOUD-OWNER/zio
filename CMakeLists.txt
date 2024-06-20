@@ -4,13 +4,14 @@ project(zio VERSION 1.0)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+set(CMAKE_CXX_FLAGS_RELEASE "-O2")
 set(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG")
 set(CMAKE_CXX_FLAGS "-flto=auto")
-set(CMAKE_CXX_FLAGS_RELEASE "-march=native -pipe -fomit-frame-pointer -foptimize-sibling-calls -foptimize-strlen -frerun-cse-after-loop -fstrict-aliasing -fweb -ftree-vrp -ftree-pta -ftree-loop-vectorize -fvect-cost-model -finline-functions -funswitch-loops")
+set(CMAKE_CXX_FLAGS_RELEASE "-pipe -fomit-frame-pointer -foptimize-sibling-calls -foptimize-strlen -frerun-cse-after-loop -fstrict-aliasing -fweb -ftree-vrp -ftree-pta -ftree-loop-vectorize -fvect-cost-model -finline-functions -funswitch-loops")
 set(ENV{PKG_CONFIG_PATH} "/usr/local/lib/pkgconfig/")
 find_package (glog 0.7.0 REQUIRED)
 find_package(PkgConfig REQUIRED)
+pkg_check_modules(unwind REQUIRED IMPORTED_TARGET "libunwind>=1.8.1")
 pkg_check_modules(zmq REQUIRED IMPORTED_TARGET "libzmq>=4.3.5" "libczmq>=4.2.1")
 
 
