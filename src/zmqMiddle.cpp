@@ -23,7 +23,7 @@ zmqMiddle::zmqMiddle(const nlohmann::json &value)
             LOG(FATAL) << "frontend socket create err!";
         }
         zmq_setsockopt(_middleSock.frontend, ZMQ_SNDHWM, &sndhwm, sizeof(sndhwm));
-        zmq_setsockopt(_middleSock.frontend, ZMQ_RCVHWM, &sndhwm, sizeof(recvhwm));
+        zmq_setsockopt(_middleSock.frontend, ZMQ_RCVHWM, &recvhwm, sizeof(recvhwm));
 
         str = "tcp://*:" + std::to_string(BackendPort);
         _middleSock.backend = zsock_new_router(str.c_str());
@@ -32,7 +32,7 @@ zmqMiddle::zmqMiddle(const nlohmann::json &value)
             LOG(FATAL) << "backend socket create err!";
         }
         zmq_setsockopt(_middleSock.backend, ZMQ_SNDHWM, &sndhwm, sizeof(sndhwm));
-        zmq_setsockopt(_middleSock.backend, ZMQ_RCVHWM, &sndhwm, sizeof(recvhwm));
+        zmq_setsockopt(_middleSock.backend, ZMQ_RCVHWM, &recvhwm, sizeof(recvhwm));
 
         _middleSock.workers = zlist_new();
         if (_middleSock.workers == nullptr)
