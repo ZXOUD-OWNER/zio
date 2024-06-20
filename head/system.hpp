@@ -12,14 +12,14 @@ extern "C"
 class NonCopyable
 {
 protected:
-    NonCopyable() = default;  // 允许默认构造函数
-    ~NonCopyable() = default; // 允许默认析构函数
+    NonCopyable() = default;  // Allow default constructor
+    ~NonCopyable() = default; // Allow default destructor
 
-    NonCopyable(const NonCopyable &) = delete;            // 禁止复制构造函数
-    NonCopyable &operator=(const NonCopyable &) = delete; // 禁止赋值运算符
+    NonCopyable(const NonCopyable &) = delete;            // Disallow copy constructor
+    NonCopyable &operator=(const NonCopyable &) = delete; // Disallow assignment operator
 
-    NonCopyable(NonCopyable &&) = delete;            // 禁止移动构造函数
-    NonCopyable &operator=(NonCopyable &&) = delete; // 禁止移动赋值运算符
+    NonCopyable(NonCopyable &&) = delete;            // Disallow move constructor
+    NonCopyable &operator=(NonCopyable &&) = delete; // Disallow move assignment operator
 };
 
 #define WORKER_READY "\001"
