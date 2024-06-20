@@ -2,7 +2,7 @@
     <img src="https://github.com/yushou-cell/zio/assets/59219725/aa73647a-014b-48ea-9613-52ab50f60fde" width="260" alt="示例图片">
 </p>
 
-# zio - Efficient Router Middleware
+# ZIO - Efficient Router Middleware
 
 Currently, this project is used for load balancing and forwarding of zmq requests
 
@@ -14,7 +14,7 @@ Currently, this project is used for load balancing and forwarding of zmq request
 |libzmq|v4.3.4|MPL-2.0 lisense|
 |nlohmann::json|v3.11.3|MIT lisense|
 
-zio is a versatile and efficient Router middleware designed to facilitate High concurrency, high traffic scenarios. It can be used both as a core component within the Zngin engine and independently deployed for managing request forwarding and load balancing.
+ZIO is a versatile and efficient Router middleware designed to facilitate High concurrency, high traffic scenarios. It can be used both as a core component within the Zngin engine and independently deployed for managing request forwarding and load balancing.
 
 https://www.zxoud.com/zio
 
