@@ -2,7 +2,7 @@
     <img src="https://github.com/yushou-cell/zio/assets/59219725/aa73647a-014b-48ea-9613-52ab50f60fde" width="260" alt="示例图片">
 </p>
 
-# zio - Efficient Router Middleware
+# ZIO - Efficient Router Middleware
 
 Currently, this project is used for load balancing and forwarding of zmq requests
 
