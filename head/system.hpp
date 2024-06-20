@@ -60,11 +60,11 @@ namespace CUitl
         unw_cursor_t cursor;
         unw_context_t context;
         std::string temp;
-        // 初始化context
+        // Init context
         unw_getcontext(&context);
         unw_init_local(&cursor, &context);
 
-        // 遍历调用栈
+        // traverse the call stack
         while (unw_step(&cursor) > 0)
         {
             unw_word_t offset, pc;
