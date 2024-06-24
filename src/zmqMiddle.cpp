@@ -22,8 +22,8 @@ zmqMiddle::zmqMiddle(const nlohmann::json &value)
         {
             LOG(FATAL) << "frontend socket create err!";
         }
-        zmq_setsockopt(_middleSock.frontend, ZMQ_SNDHWM, &sndhwm, sizeof(sndhwm));
-        zmq_setsockopt(_middleSock.frontend, ZMQ_RCVHWM, &recvhwm, sizeof(recvhwm));
+        zsock_set_rcvhwm(_middleSock.frontend, recvhwm);
+        zsock_set_sndhwm(_middleSock.frontend, sndhwm);
 
         str = "tcp://*:" + std::to_string(BackendPort);
         _middleSock.backend = zsock_new_router(str.c_str());
@@ -31,8 +31,11 @@ zmqMiddle::zmqMiddle(const nlohmann::json &value)
         {
             LOG(FATAL) << "backend socket create err!";
         }
-        zmq_setsockopt(_middleSock.backend, ZMQ_SNDHWM, &sndhwm, sizeof(sndhwm));
-        zmq_setsockopt(_middleSock.backend, ZMQ_RCVHWM, &recvhwm, sizeof(recvhwm));
+        // zmq_setsockopt(_middleSock.backend, ZMQ_SNDHWM, &sndhwm, sizeof(sndhwm));
+        // zmq_setsockopt(_middleSock.backend, ZMQ_RCVHWM, &recvhwm, sizeof(recvhwm));
+        zsock_set_rcvhwm(_middleSock.backend, recvhwm);
+        zsock_set_sndhwm(_middleSock.backend, sndhwm);
+        zsock_set_router_mandatory(_middleSock.backend, 1);
 
         _middleSock.workers = zlist_new();
         if (_middleSock.workers == nullptr)
@@ -62,22 +65,82 @@ zmqMiddle::~zmqMiddle()
     zsock_destroy(&_middleSock.backend);
 }
 
+bool zmqMiddle::constructReq(zmsg_t *msg, lbbroker_t *self, zloop_t *loop)
+{
+    if (zlist_size(self->workers) == 0)
+    {
+        zloop_reader_end(loop, self->frontend);
+        LOG(ERROR) << "workers err! err is 0";
+        return false;
+    }
+    int res = zmsg_pushmem(msg, NULL, 0); // delimiter
+    if (res == -1)
+    {
+        LOG(ERROR) << "zmsg_pushmem err! err is " << strerror(errno);
+        return false;
+    }
+    res = zmsg_push(msg, (zframe_t *)zlist_pop(self->workers));
+    if (res == -1)
+    {
+        LOG(ERROR) << "zmsg_push err! err is " << strerror(errno);
+        return false;
+    }
+    return true;
+}
+
 int zmqMiddle::s_handle_frontend(zloop_t *loop, zsock_t *reader, void *arg)
 {
+
+    ZMQ_ROUTER_MANDATORY;
+
     lbbroker_t *self = static_cast<lbbroker_t *>(arg);
+    if (zlist_size(self->workers) == 0)
+    {
+        zloop_reader_end(loop, self->frontend);
+        // LOG(ERROR) << "workers err! err is 0";
+        return 0;
+    }
+    DLOG(ERROR) << "before     zmsg_t *msg = zmsg_recv(self->frontend);";
     zmsg_t *msg = zmsg_recv(self->frontend);
+    DLOG(ERROR) << "after     zmsg_t *msg = zmsg_recv(self->frontend);";
     if (msg)
     {
-        zmsg_pushmem(msg, NULL, 0); // delimiter
-        zmsg_push(msg, (zframe_t *)zlist_pop(self->workers));
-        zmsg_send(&msg, self->backend);
-
-        //  Cancel reader on frontend if we went from 1 to 0 workers
-        if (zlist_size(self->workers) == 0)
+        while (true) // If routing fails, then continue to loop and get a new route (using zlist_pop(self->workers)), until successful or a viable route is found or the number of backend nodes is zero.
         {
-            zloop_reader_end(loop, self->frontend);
+            zmsg_t *msgCopy = zmsg_dup(msg);
+            if (!constructReq(msgCopy, self, loop))
+            {
+                DLOG(ERROR) << "after     !constructReq(msgCopy, self, loop)";
+                zmsg_destroy(&msg);
+                zmsg_destroy(&msgCopy);
+                break;
+            }
+            DLOG(ERROR) << "before zmsg_send(&msgCopy, self->backend)";
+
+            int res = zmsg_send(&msgCopy, self->backend);
+            DLOG(ERROR) << "after zmsg_send(&msgCopy, self->backend)";
+            if (res == -1)
+            {
+
+                auto errInt = errno;
+                if (errInt == EHOSTUNREACH)
+                {
+                    DLOG(ERROR) << "after EHOSTUNREACH";
+                    continue;
+                }
+                else
+                {
+                    LOG(ERROR) << "zmsg_push err! err is " << strerror(errno);
+                }
+            }
+            else
+            {
+                break;
+            }
         }
+        //  Cancel reader on frontend if we went from 1 to 0 workers
     }
+    zmsg_destroy(&msg);
     return 0;
 }
 
@@ -104,15 +167,20 @@ int zmqMiddle::s_handle_backend(zloop_t *loop, zsock_t *reader, void *arg)
         zlist_append(self->workers, identity);
 
         //  Enable reader on frontend if we went from 0 to 1 workers
+        DLOG(ERROR) << "before if (zlist_size(self->workers) == 1) size is" << zlist_size(self->workers);
         if (zlist_size(self->workers) == 1)
         {
+            DLOG(ERROR) << "after if (zlist_size(self->workers) == 1)";
             auto err = zloop_reader(loop, self->frontend, s_handle_frontend, self);
             if (err == -1)
             {
                 LOG(ERROR) << "zloop_reader err! err is " << strerror(errno) << " function order :" << CUitl::Print_trace();
             }
         }
+
         //  Forward message to client if it's not a READY
+        DLOG(ERROR) << "before zframe_t *frame = zmsg_first(msg);";
+
         zframe_t *frame = zmsg_first(msg);
         if (memcmp(zframe_data(frame), WORKER_READY, 1) == 0)
         {
@@ -133,6 +201,11 @@ int zmqMiddle::s_handle_backend(zloop_t *loop, zsock_t *reader, void *arg)
 void zmqMiddle::start()
 {
     _zloop.reactor = zloop_new();
-    zloop_reader(_zloop.reactor, _middleSock.backend, s_handle_backend, &_middleSock);
+    auto err = zloop_reader(_zloop.reactor, _middleSock.backend, s_handle_backend, &_middleSock);
+    if (err == -1)
+    {
+        LOG(ERROR) << "zloop_reader err! err is " << strerror(errno) << " function order :" << CUitl::Print_trace();
+    }
+
     zloop_start(_zloop.reactor);
 }
