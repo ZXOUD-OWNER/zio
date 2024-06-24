@@ -31,6 +31,7 @@ private:
 private:
     static int s_handle_backend(zloop_t *loop, zsock_t *reader, void *arg);
     static int s_handle_frontend(zloop_t *loop, zsock_t *reader, void *arg);
+    static bool constructReq(zmsg_t *msg, lbbroker_t *self, zloop_t *loop);
 
 public:
     zmqMiddle(const nlohmann::json &obj);
