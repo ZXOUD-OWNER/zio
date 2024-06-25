@@ -13,6 +13,7 @@ Currently, this project is used for load balancing and forwarding of zmq request
 |libczmq|v4.2.1|MPL-2.0 lisense|
 |libzmq|v4.3.4|MPL-2.0 lisense|
 |nlohmann::json|v3.11.3|MIT lisense|
+|mimalloc|2.1.7|MIT lisense|
 
 ZIO is a versatile and efficient Router middleware designed to facilitate High concurrency, high traffic scenarios. It can be used both as a core component within the Zngin engine and independently deployed for managing request forwarding and load balancing.
 

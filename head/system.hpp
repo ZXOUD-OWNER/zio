@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <libunwind.h>
 #include <fstream>
+#include <mimalloc-override.h>
 #include <nlohmann/json.hpp>
 extern "C"
 {
