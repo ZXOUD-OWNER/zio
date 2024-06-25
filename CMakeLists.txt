@@ -13,7 +13,7 @@ endif()
 
 
 
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -pipe -fomit-frame-pointer -foptimize-sibling-calls -foptimize-strlen -frerun-cse-after-loop -fstrict-aliasing -fweb -ftree-vrp -ftree-pta -ftree-loop-vectorize -fvect-cost-model -finline-functions -funswitch-loops -flto=auto")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -march=x86-64-v3 -pipe -fomit-frame-pointer -foptimize-sibling-calls -foptimize-strlen -frerun-cse-after-loop -fstrict-aliasing -fweb -ftree-vrp -ftree-pta -ftree-loop-vectorize -fvect-cost-model -finline-functions -funswitch-loops -flto=auto")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto=auto")
 set(ENV{PKG_CONFIG_PATH} "/usr/local/lib/pkgconfig/")
