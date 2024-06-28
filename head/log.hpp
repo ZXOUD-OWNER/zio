@@ -1,3 +1,11 @@
+/*
+ * This file is part of the software and assets of HK ZXOUD LIMITED.
+ * @copyright (c) HK ZXOUD LIMITED https://www.zxoud.com
+ * Author: yushou-cell(email:2354739167@qq.com)
+ * create: 20240619
+ * FilePath: /zio/head/log.hpp
+ * Description: write some logs by google
+ */
 #pragma once
 #include "system.hpp"
 
@@ -21,11 +29,6 @@ struct Log_MQ : public NonCopyable
         google::SetLogDestination(google::FATAL, "./Log/Fatallog_");
         FLAGS_minloglevel = google::INFO;
         google::InstallFailureSignalHandler();
-
-        // LOG(INFO) << "This is an information message";
-        // LOG(WARNING) << "This is a warning message";
-        // LOG(ERROR) << "This is an error message";
-        // LOG(FATAL) << "This is an FATAL message";
     }
     inline ~Log_MQ()
     {
