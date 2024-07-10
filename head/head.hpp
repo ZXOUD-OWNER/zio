@@ -7,5 +7,7 @@
  * Description: include some files
  */
 #pragma once
+#include "ZmqScheduling.hpp"
+#include "BackendManager.hpp"
 #include "zmqMiddle.hpp"
 #include "log.hpp"
