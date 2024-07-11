@@ -13,6 +13,11 @@
 #include <fstream>
 #include <mimalloc-override.h>
 #include <nlohmann/json.hpp>
+#include <unordered_map>
+#include <atomic>
+#include <mutex>
+#include <memory>
+#include <unordered_set>
 extern "C"
 {
 #include <czmq.h>
@@ -98,4 +103,9 @@ namespace CUitl
         }
         return temp;
     }
+    template <typename T>
+    constexpr auto toUType(T t) noexcept // Obtain the underlying type of an enumeration type
+    {
+        return static_cast<std::underlying_type_t<T>>(t);
+    } // The passed enumeration type is known at compile time, so it is also constexpr.
 }
