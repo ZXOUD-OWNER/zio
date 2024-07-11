@@ -17,11 +17,34 @@ enum class ServerSerial
     Unknown
 };
 
+class ZmqClient : NonCopyable
+{
+private:
+    std::string _address;
+    zsock_t *_push;
+    std::mutex _zmqClientMutex;
+
+public:
+    ZmqClient(std::string address);
+    ~ZmqClient();
+    ZmqClient(ZmqClient &&temp);
+    /**
+     * @description: Send scheduling response to the specified client.
+     * @param {string} content
+     * @return {*} Return the size of the sent data, return -1 if there is an error
+     */
+    int send(std::string content);
+};
+
 class ZmqScheduling : NonCopyable
 {
 private:
+    // This container will never delete elements, it will only add them
     std::unordered_map<ServerSerial, BackendManager> _backendSelect;
-    std::mutex _backendSelectMutex;
+    std::unordered_map<std::string, ZmqClient> _clientGroup;
+    std::mutex _backendSelectMutex, _clientGroupMutex;
+    nlohmann::json _errJson;
+    nlohmann::json _resJson;
 
 public:
     ZmqScheduling();
@@ -33,14 +56,19 @@ public:
      * @return {*}
      */
     std::string getBackend(ServerSerial serial);
-    void serverManager();
     /**
      * @description: Start backend service management.
      * @return {*}
      */
-    void startServerManager();
+    void serverManager();
     /**
      * @description: backend service management. Related to service registration, service status monitoring, and other aspects
+     * @return {*}
+     */
+    void startServerManager();
+
+    /**
+     * @description: service scheduling listener
      * @return {*}
      */
     void selectServer();
